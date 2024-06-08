@@ -4,9 +4,14 @@
     <title>BabylonJS GLB Upload and Load</title>
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
     <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+    <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
   </head>
   <body>
     <input type="file" id="fileInput" accept=".fbx" />
+    <input type="file" id="soundInput" accept="audio/*" />
+    <button id="playButton">Play</button>
+    <button id="pauseButton">Pause</button>
+    <button id="stopButton">Stop</button>
     <canvas id="renderCanvas" style="width: 100%; height: 100%"></canvas>
     <script src="app.js"></script>
   </body>

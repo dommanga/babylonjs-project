@@ -83,4 +83,76 @@ window.addEventListener("DOMContentLoaded", () => {
         });
     }
   });
+
+  // 오디오 파일 업로드 및 컨트롤
+  const soundInput = document.getElementById("soundInput");
+  const playButton = document.getElementById("playButton");
+  const pauseButton = document.getElementById("pauseButton");
+  const stopButton = document.getElementById("stopButton");
+
+  let audioContext;
+  let audioBuffer;
+  let sourceNode;
+  let startTime = 0;
+  let pausedAt = 0;
+
+  soundInput.addEventListener("change", (event) => {
+    const files = event.target.files;
+    if (files.length > 0) {
+      const file = files[0];
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        const arrayBuffer = e.target.result;
+        if (!audioContext) {
+          audioContext = new (window.AudioContext ||
+            window.webkitAudioContext)();
+        }
+        audioContext.decodeAudioData(
+          arrayBuffer,
+          (buffer) => {
+            audioBuffer = buffer;
+            console.log("Audio file loaded successfully.");
+          },
+          (error) => {
+            console.error("Error decoding audio file:", error);
+          }
+        );
+      };
+
+      reader.readAsArrayBuffer(file);
+    }
+  });
+
+  // Audio control
+  playButton.addEventListener("click", () => {
+    if (audioBuffer) {
+      if (sourceNode) {
+        sourceNode.stop(0);
+      }
+      sourceNode = audioContext.createBufferSource();
+      sourceNode.buffer = audioBuffer;
+      sourceNode.connect(audioContext.destination);
+      sourceNode.start(0, pausedAt);
+      startTime = audioContext.currentTime - pausedAt;
+      console.log("Audio playing from:", pausedAt);
+    }
+  });
+
+  pauseButton.addEventListener("click", () => {
+    if (sourceNode) {
+      sourceNode.stop(0);
+      pausedAt = audioContext.currentTime - startTime;
+      console.log("Audio paused at:", pausedAt);
+    }
+  });
+
+  stopButton.addEventListener("click", () => {
+    if (sourceNode) {
+      sourceNode.stop(0);
+      sourceNode = null;
+      pausedAt = 0;
+      console.log("Audio stopped...");
+    }
+  });
 });
