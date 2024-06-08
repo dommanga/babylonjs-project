@@ -1,0 +1,18 @@
+# Node modules
+node_modules/
+
+# Build outputs
+dist/
+.parcel-cache/
+
+# Environment variables
+.env
+
+# OS generated files
+.DS_Store
+
+# Editor directories and files
+.vscode/
+
+# Uploads folder (if it's only for temporary uploaded files)
+uploads/
