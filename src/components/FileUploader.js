@@ -14,7 +14,7 @@ export class FileUploader {
       const formData = new FormData();
       formData.append("file", file);
       console.log("Uploading file...");
-      fetch("http://localhost:3000/upload", { method: "POST", body: formData })
+      fetch("/upload", { method: "POST", body: formData })
         .then((response) => response.json())
         .then((data) =>
           BABYLON.SceneLoader.ImportMeshAsync(

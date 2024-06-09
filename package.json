@@ -1,13 +1,9 @@
 {
   "name": "babylonjs-project",
   "version": "1.0.0",
-  "main": "index.js",
   "scripts": {
-    "start": "concurrently \"parcel public/index.html\" \"node server.js\"",
-    "build": "parcel build public/index.html"
-  },
-  "proxy": {
-    "/upload": "http://localhost:3000"
+    "start": "node server.js",
+    "build": "node server.js"
   },
   "keywords": [],
   "author": "",
