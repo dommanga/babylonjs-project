@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "parcel public/index.html",
+    "start": "concurrently \"parcel public/index.html\" \"node server.js\"",
     "build": "parcel build public/index.html"
+  },
+  "proxy": {
+    "/upload": "http://localhost:3000"
   },
   "keywords": [],
   "author": "",
@@ -14,6 +17,7 @@
     "assert": "^2.1.0",
     "browserify-zlib": "^0.2.0",
     "buffer": "^6.0.3",
+    "concurrently": "^8.2.2",
     "crypto-browserify": "^3.12.0",
     "events": "^3.3.0",
     "lite-server": "^2.6.1",
@@ -31,8 +35,10 @@
   "dependencies": {
     "@babylonjs/loaders": "^7.10.1",
     "babylonjs": "^7.10.1",
+    "cors": "^2.8.5",
     "express": "^4.19.2",
     "fbx2gltf": "^0.9.7-p1",
-    "multer": "^1.4.5-lts.1"
+    "multer": "^1.4.5-lts.1",
+    "web-audio-beat-detector": "^8.2.10"
   }
 }

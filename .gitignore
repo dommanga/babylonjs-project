@@ -4,6 +4,7 @@ node_modules/
 # Build outputs
 dist/
 .parcel-cache/
+.cache/
 
 # Environment variables
 .env

@@ -1,15 +1,17 @@
 const express = require("express");
+const cors = require("cors");
 const multer = require("multer");
 const fbx2gltf = require("fbx2gltf");
 const path = require("path");
 const fs = require("fs");
 
 const app = express();
+app.use(cors());
 const port = 3000;
 
 const upload = multer({ dest: "uploads/" });
 
-app.use(express.static("public"));
+app.use(express.static("dist"));
 
 app.post("/upload", upload.single("file"), (req, res) => {
   const fbxFilePath = req.file.path;
