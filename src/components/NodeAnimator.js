@@ -2,79 +2,125 @@ export class NodeAnimator {
   constructor(scene) {
     this.scene = scene;
     this.nodes = {};
-    this.poses = this.definePoses();
+    this.jointLimits = this.defineJointLimits();
+    this.intervalId = null;
   }
 
   initializeNodes() {
-    // 모든 필요한 노드를 사전에 찾아서 저장
     this.nodes = {
       hips: this.scene.getNodeByName("mixamorig:Hips"),
       rightUpLeg: this.scene.getNodeByName("mixamorig:RightUpLeg"),
-      // 추가 노드 초기화
+      // additional node initialization
+    };
+
+    // // initialize
+    // Object.keys(this.nodes).forEach((nodeName) => {
+    //   const node = this.nodes[nodeName];
+    //   if (node) {
+    //     node.computeWorldMatrix(true);
+    //   }
+    // });
+  }
+
+  defineJointLimits() {
+    return {
+      hips: {
+        x: [0, 0],
+        y: [-45, 45],
+        z: [0, 0],
+      },
+      rightUpLeg: {
+        x: [0, 0],
+        y: [-30, 50],
+        z: [120, 180],
+      },
+      // additioanl limits??
     };
   }
 
-  definePoses() {
-    // return [
-    //   {
-    //     "mixamorig:Hips": { rotation: new BABYLON.Vector3(Math.PI / 2, 0, 0) },
-    //     "mixamorig:RightUpLeg": {
-    //       rotation: new BABYLON.Vector3(0, Math.PI / 6, 0),
-    //     },
-    //     // 다른 노드 포즈 정의...
-    //   },
-    //   {
-    //     "mixamorig:Hips": { rotation: new BABYLON.Vector3(-Math.PI / 2, 0, 0) },
-    //     "mixamorig:RightUpLeg": {
-    //       rotation: new BABYLON.Vector3(0, -Math.PI / 6, 0),
-    //     },
-    //     // 다른 포즈 정의...
-    //   },
-    //   // 추가 포즈...
-    // ];
-    // 각 노드에 대한 포즈 정의
-    return [
-      {
-        hips: new BABYLON.Vector3(Math.PI / 2, 0, 0),
-        rightUpLeg: new BABYLON.Vector3(0, Math.PI / 6, 0),
-        // 기타 노드 포즈
-      },
-      {
-        hips: new BABYLON.Vector3(-Math.PI / 2, 0, 0),
-        rightUpLeg: new BABYLON.Vector3(0, -Math.PI / 6, 0),
-        // 다른 포즈
-      },
-      // 추가 포즈 정의
-    ];
+  getRandomRotation(min, max) {
+    return Math.random() * (max - min) + min;
   }
 
-  applyRandomPose() {
-    this.scene.debugLayer.show();
+  createRandomPose() {
+    const pose = {};
+    const r = Math.PI / 180; // radian
+    for (const nodeName in this.jointLimits) {
+      const limits = this.jointLimits[nodeName];
+      pose[nodeName] = new BABYLON.Vector3(
+        this.getRandomRotation(limits.x[0] * r, limits.x[1] * r),
+        this.getRandomRotation(limits.y[0] * r, limits.y[1] * r),
+        this.getRandomRotation(limits.z[0] * r, limits.z[1] * r)
+      );
+    }
+    return pose;
+  }
 
-    // const pose = this.poses[Math.floor(Math.random() * this.poses.length)];
-
-    // for (const nodeName in pose) {
-    //   const node = this.scene.getNodeByName(nodeName);
-    //   if (node) {
-    //     const nodePose = pose[nodeName];
-    //     node.rotation = nodePose.rotation;
-    //     node.computeWorldMatrix(true);
-    //     // 추가적인 위치, 크기 조정이 필요하다면 여기에 포함
-    //   }
-    // }
-
-    const pose = this.poses[Math.floor(Math.random() * this.poses.length)];
-    console.log("current pose: ", pose);
-    Object.keys(pose).forEach((nodeName) => {
+  applyRandomPose(randomPose) {
+    console.log("Applying pose: ", randomPose);
+    Object.keys(randomPose).forEach((nodeName) => {
       const node = this.nodes[nodeName];
       if (node) {
-        node.rotation = pose[nodeName];
-        node.computeWorldMatrix(true);
+        // create animation
+        const anim = new BABYLON.Animation(
+          "anim_" + nodeName,
+          "rotation",
+          30, // FPS
+          BABYLON.Animation.ANIMATIONTYPE_VECTOR3,
+          BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE
+        );
+
+        const easingFunction = new BABYLON.CubicEase();
+        easingFunction.setEasingMode(
+          BABYLON.EasingFunction.EASINGMODE_EASEINOUT
+        );
+
+        anim.setEasingFunction(easingFunction);
+
+        const keys = [
+          { frame: 0, value: node.rotation.clone() },
+          { frame: 30, value: randomPose[nodeName] },
+        ];
+
+        anim.setKeys(keys);
+
+        // start animation
+        node.animations = [anim];
+        this.scene.beginAnimation(node, 0, 30, false);
       }
     });
   }
 
   startAnimation(bpm) {
-    setInterval(() => this.applyRandomPose(), 1000);
+    const frameDuration = 60000 / bpm;
+    let lastFrameTime = performance.now();
+
+    const animate = (time) => {
+      if (time - lastFrameTime >= frameDuration) {
+        const randomPose = this.createRandomPose();
+        this.applyRandomPose(randomPose);
+        lastFrameTime = time;
+      }
+      this.animationFrameId = requestAnimationFrame(animate);
+    };
+
+    this.stopAnimation();
+    this.animationFrameId = requestAnimationFrame(animate);
+  }
+
+  pauseAnimation() {
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+      console.log("Animation paused.");
+    }
+  }
+
+  stopAnimation() {
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+      console.log("Animation stopped.");
+    }
   }
 }
