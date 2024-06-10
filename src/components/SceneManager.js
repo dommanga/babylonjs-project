@@ -9,14 +9,21 @@ export class SceneManager {
   }
 
   createScene() {
-    new BABYLON.ArcRotateCamera(
+    const camera = new BABYLON.ArcRotateCamera(
       "camera",
       -Math.PI / 2,
       Math.PI / 2,
       2,
       new BABYLON.Vector3(0, 0, 0),
       this.scene
-    ).attachControl(this.canvas, true);
+    );
+    camera.attachControl(this.canvas, true);
+
+    // Zoom lock
+    const zoomLockDistance = 2; // fixed distance
+    camera.lowerRadiusLimit = zoomLockDistance;
+    camera.upperRadiusLimit = zoomLockDistance;
+
     new BABYLON.HemisphericLight(
       "light",
       new BABYLON.Vector3(1, 1, 0),

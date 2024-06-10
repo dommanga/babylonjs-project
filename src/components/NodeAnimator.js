@@ -2,14 +2,13 @@ export class NodeAnimator {
   constructor(scene) {
     this.scene = scene;
     this.nodes = {};
+    this.initialPose = {};
     this.jointLimits = this.defineJointLimits();
     this.intervalId = null;
   }
 
   initializeNodes() {
     this.nodes = {
-      hips: this.scene.getNodeByName("mixamorig:Hips"),
-
       spine1: this.scene.getNodeByName("mixamorig:Spine1"),
       spine2: this.scene.getNodeByName("mixamorig:Spine2"),
 
@@ -35,13 +34,21 @@ export class NodeAnimator {
       rightLeg: this.scene.getNodeByName("mixamorig:RightLeg"),
     };
 
-    // // initialize
-    // Object.keys(this.nodes).forEach((nodeName) => {
-    //   const node = this.nodes[nodeName];
-    //   if (node) {
-    //     node.computeWorldMatrix(true);
-    //   }
-    // });
+    // specific modification
+    Object.keys(this.nodes).forEach((nodeName) => {
+      const node = this.nodes[nodeName];
+      if (node) {
+        let initialRotation = node.rotation.clone();
+        if (nodeName === "leftUpLeg" || nodeName === "rightUpLeg") {
+          initialRotation.z = Math.PI;
+        } else if (nodeName === "leftShoulder") {
+          initialRotation.z = -Math.PI / 2;
+        } else if (nodeName === "rightShoulder") {
+          initialRotation.z = Math.PI / 2;
+        }
+        this.initialPose[nodeName] = initialRotation;
+      }
+    });
   }
 
   defineJointLimits() {
@@ -142,6 +149,14 @@ export class NodeAnimator {
         z: [0, 0],
       },
     };
+  }
+
+  resetToInitialPose() {
+    for (const nodeName in this.initialPose) {
+      const node = this.nodes[nodeName];
+      const initialState = this.initialPose[nodeName];
+      node.rotation = initialState.clone();
+    }
   }
 
   getRandomRotation(min, max) {

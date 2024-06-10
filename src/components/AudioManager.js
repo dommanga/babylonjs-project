@@ -30,6 +30,14 @@ export class AudioManager {
     const files = event.target.files;
     if (files.length > 0) {
       const file = files[0];
+      let fileName = file.name;
+      const lastDotIndex = fileName.lastIndexOf(".");
+      if (lastDotIndex > 0) {
+        fileName = fileName.substring(0, lastDotIndex);
+      }
+      document.querySelector(".sound-button").style.filter = "brightness(0.5)";
+      document.getElementById("musicUploadStatus").innerText = fileName;
+
       const reader = new FileReader();
 
       console.log("Uploading audio file...");
@@ -53,7 +61,6 @@ export class AudioManager {
                 document.getElementById(
                   "bpmDisplay"
                 ).innerText = `Detected BPM: ${this.bpm}`;
-                this.animator.initializeNodes();
               })
               .catch((err) => {
                 console.error("Error analyzing BPM:", error);
@@ -101,6 +108,7 @@ export class AudioManager {
       this.sourceNode = null;
       this.pausedAt = 0;
       this.animator.stopAnimation();
+      this.animator.resetToInitialPose();
 
       console.log("Audio stopped...");
     }

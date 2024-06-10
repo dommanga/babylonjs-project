@@ -1,0 +1,169 @@
+body {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  height: 100vh;
+  font-family: Arial, sans-serif;
+  background-color: #33334a;
+}
+
+header {
+  position: relative;
+  width: 100%;
+}
+
+.banner {
+  width: 100%;
+  height: auto;
+}
+
+.banner-buttons {
+  position: absolute;
+  top: 80%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  gap: 150px;
+}
+
+.banner-button {
+  width: 100px;
+  height: 100px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  border: none;
+  cursor: pointer;
+  background-color: transparent;
+  filter: brightness(100%);
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.banner-button:hover {
+  transform: scale(1.1);
+  filter: brightness(0.8);
+}
+
+.file-button {
+  background-image: url("./img/file-button.png");
+}
+
+.sound-button {
+  background-image: url("./img/sound-button.png");
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 10px;
+  background: #33334a;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+}
+
+.upload-status-display {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+#musicUploadStatus {
+  color: powderblue;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.music-controls {
+  display: flex;
+  justify-content: center; /* 중앙에 배치 */
+  align-items: center;
+  gap: 20px; /* 간격 조정 */
+  flex-grow: 1;
+}
+
+.music-button {
+  width: 30px; /* 버튼 너비 */
+  height: 30px; /* 버튼 높이 */
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  border: none;
+  cursor: pointer;
+  background-color: transparent; /* 배경색 투명 */
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.music-button:hover {
+  transform: scale(1.1);
+  filter: brightness(0.8);
+}
+
+.play-button {
+  background-image: url("./img/play-button.png");
+}
+
+.pause-button {
+  background-image: url("./img/pause-button.png");
+}
+
+.stop-button {
+  background-image: url("./img/stop-button.png");
+}
+
+.bpm-display {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+#bpmDisplay {
+  color: yellow;
+  font-size: 16px;
+}
+
+#renderCanvas {
+  width: 100%;
+  height: 100%;
+  flex-grow: 1;
+}
+
+/* 반응형 디자인을 위한 미디어 쿼리 */
+@media (max-width: 768px) {
+  .banner-buttons {
+    flex-direction: row;
+    gap: 10px;
+  }
+
+  .banner-button {
+    width: 60px;
+    height: 60px;
+  }
+
+  .controls {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .upload-status-display {
+    justify-content: center;
+  }
+
+  .music-controls {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .music-button {
+    width: 40px;
+    height: 40px;
+  }
+
+  .bpm-display {
+    justify-content: center;
+  }
+}

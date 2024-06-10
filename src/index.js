@@ -5,13 +5,7 @@ import { NodeAnimator } from "./components/NodeAnimator";
 
 window.addEventListener("DOMContentLoaded", () => {
   const sceneManager = new SceneManager("renderCanvas");
-  const fileUploader = new FileUploader(sceneManager);
   const nodeAnimator = new NodeAnimator(sceneManager.scene);
+  const fileUploader = new FileUploader(sceneManager, nodeAnimator);
   const audioManager = new AudioManager(sceneManager, nodeAnimator);
 });
-
-// document.getElementById("playButton").addEventListener("click", () => {
-//   fileUploader.handleFileChange({
-//     target: document.getElementById("fileInput"),
-//   });
-// });

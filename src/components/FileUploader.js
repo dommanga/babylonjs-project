@@ -1,6 +1,7 @@
 export class FileUploader {
-  constructor(sceneManager) {
+  constructor(sceneManager, nodeAnimator) {
     this.sceneManager = sceneManager;
+    this.animator = nodeAnimator;
     this.fileInput = document.getElementById("fileInput");
     this.fileInput.addEventListener("change", (event) =>
       this.handleFileChange(event)
@@ -11,6 +12,9 @@ export class FileUploader {
     const files = event.target.files;
     if (files.length > 0) {
       const file = files[0];
+      const fileName = file.name;
+      document.querySelector(".file-button").style.filter = "brightness(0.5)";
+
       const formData = new FormData();
       formData.append("file", file);
       console.log("Uploading file...");
@@ -28,10 +32,13 @@ export class FileUploader {
                 console.log("base animation stop.");
                 result.animationGroups.forEach((group) => group.stop());
               }
+              this.sceneManager.addMesh(result.meshes[0]);
 
               this.sceneManager.linkBonesToNodes(result.skeletons[0]);
 
-              this.sceneManager.addMesh(result.meshes[0]);
+              this.animator.initializeNodes();
+              this.animator.resetToInitialPose();
+
               // this.sceneManager.scene.debugLayer.show();
             })
             .catch((error) => console.error("Error loading model:", error))

@@ -1,20 +1,42 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>BabylonJS GLB Upload and Load</title>
+    <title>3D Dance Animation</title>
+    <link rel="stylesheet" type="text/css" href="styles.css" />
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
     <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
     <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
   </head>
   <body>
-    <input type="file" id="fileInput" accept=".fbx" />
-    <input type="file" id="soundInput" accept="audio/*" />
-    <button id="uploadButton">Start Animation</button>
-    <button id="playButton">Play</button>
-    <button id="pauseButton">Pause</button>
-    <button id="stopButton">Stop</button>
-    <p id="bpmDisplay">BPM:</p>
-    <canvas id="renderCanvas" style="width: 100%; height: 100%"></canvas>
+    <header>
+      <img src="./img/banner.png" alt="Banner" class="banner" />
+      <div class="banner-buttons">
+        <button
+          class="banner-button file-button"
+          onclick="document.getElementById('fileInput').click();"
+        ></button>
+        <button
+          class="banner-button sound-button"
+          onclick="document.getElementById('soundInput').click();"
+        ></button>
+      </div>
+    </header>
+    <input type="file" id="fileInput" accept=".fbx" style="display: none" />
+    <input type="file" id="soundInput" accept="audio/*" style="display: none" />
+    <div class="controls">
+      <div class="upload-status-display">
+        <p id="musicUploadStatus"></p>
+      </div>
+      <div class="music-controls">
+        <button id="playButton" class="music-button play-button"></button>
+        <button id="pauseButton" class="music-button pause-button"></button>
+        <button id="stopButton" class="music-button stop-button"></button>
+      </div>
+      <div class="bpm-display">
+        <p id="bpmDisplay"></p>
+      </div>
+    </div>
+    <canvas id="renderCanvas"></canvas>
     <script type="module" src="../src/index.js"></script>
   </body>
 </html>
