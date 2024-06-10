@@ -24,8 +24,14 @@ export class FileUploader {
             this.sceneManager.getScene()
           )
             .then((result) => {
+              if (result.animationGroups.length > 0) {
+                console.log("base animation stop.");
+                result.animationGroups.forEach((group) => group.stop());
+              }
+
+              this.sceneManager.linkBonesToNodes(result.skeletons[0]);
+
               this.sceneManager.addMesh(result.meshes[0]);
-              // this.sceneManager.setAnimationGroups(result.animationGroups);
             })
             .catch((error) => console.error("Error loading model:", error))
         )

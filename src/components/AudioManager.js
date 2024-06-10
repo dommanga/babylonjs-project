@@ -1,9 +1,10 @@
 import { analyze } from "web-audio-beat-detector";
 
 export class AudioManager {
-  constructor(sceneManager) {
+  constructor(sceneManager, nodeAnimator) {
     this.sceneManager = sceneManager;
     this.soundInput = document.getElementById("soundInput");
+    this.animator = nodeAnimator;
     this.playButton = document.getElementById("playButton");
     this.pauseButton = document.getElementById("pauseButton");
     this.stopButton = document.getElementById("stopButton");
@@ -50,7 +51,8 @@ export class AudioManager {
                 document.getElementById(
                   "bpmDisplay"
                 ).innerText = `Detected BPM: ${bpm}`;
-                // this.sceneManager.startAnimation(bpm);
+                this.animator.initializeNodes();
+                this.animator.startAnimation(bpm);
               })
               .catch((err) => {
                 console.error("Error analyzing BPM:", error);
