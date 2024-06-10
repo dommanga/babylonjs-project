@@ -2,8 +2,8 @@
   "name": "babylonjs-project",
   "version": "1.0.0",
   "scripts": {
-    "start": "node server.js",
-    "build": "node server.js"
+    "start": "concurrently \"parcel build public/index.html --dist-dir dist\" \"node server.js\"",
+    "build": "parcel build public/index.html --dist-dir dist"
   },
   "keywords": [],
   "author": "",

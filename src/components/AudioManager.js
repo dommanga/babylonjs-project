@@ -1,9 +1,11 @@
 import { analyze } from "web-audio-beat-detector";
 
 export class AudioManager {
-  constructor(sceneManager) {
+  constructor(sceneManager, nodeAnimator) {
     this.sceneManager = sceneManager;
     this.soundInput = document.getElementById("soundInput");
+    this.animator = nodeAnimator;
+    this.bpm = 0;
     this.playButton = document.getElementById("playButton");
     this.pauseButton = document.getElementById("pauseButton");
     this.stopButton = document.getElementById("stopButton");
@@ -46,11 +48,12 @@ export class AudioManager {
 
             analyze(this.audioBuffer)
               .then((bpm) => {
-                console.log("Detected BPM:", bpm);
+                this.bpm = Math.round(bpm);
+                console.log("Detected BPM:", this.bpm);
                 document.getElementById(
                   "bpmDisplay"
-                ).innerText = `Detected BPM: ${bpm}`;
-                // this.sceneManager.startAnimation(bpm);
+                ).innerText = `Detected BPM: ${this.bpm}`;
+                this.animator.initializeNodes();
               })
               .catch((err) => {
                 console.error("Error analyzing BPM:", error);
@@ -76,6 +79,8 @@ export class AudioManager {
       this.sourceNode.connect(this.audioContext.destination);
       this.sourceNode.start(0, this.pausedAt);
       this.startTime = this.audioContext.currentTime - this.pausedAt;
+      this.animator.startAnimation(this.bpm);
+
       console.log("Audio playing from:", this.pausedAt);
     }
   }
@@ -84,6 +89,8 @@ export class AudioManager {
     if (this.sourceNode) {
       this.sourceNode.stop(0);
       this.pausedAt = this.audioContext.currentTime - this.startTime;
+      this.animator.pauseAnimation();
+
       console.log("Audio paused at:", this.pausedAt);
     }
   }
@@ -93,6 +100,8 @@ export class AudioManager {
       this.sourceNode.stop(0);
       this.sourceNode = null;
       this.pausedAt = 0;
+      this.animator.stopAnimation();
+
       console.log("Audio stopped...");
     }
   }
