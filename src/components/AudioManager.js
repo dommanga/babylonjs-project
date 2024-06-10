@@ -48,11 +48,11 @@ export class AudioManager {
 
             analyze(this.audioBuffer)
               .then((bpm) => {
-                console.log("Detected BPM:", bpm);
-                this.bpm = bpm;
+                this.bpm = Math.round(bpm);
+                console.log("Detected BPM:", this.bpm);
                 document.getElementById(
                   "bpmDisplay"
-                ).innerText = `Detected BPM: ${bpm}`;
+                ).innerText = `Detected BPM: ${this.bpm}`;
                 this.animator.initializeNodes();
               })
               .catch((err) => {

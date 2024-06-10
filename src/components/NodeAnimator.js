@@ -9,8 +9,30 @@ export class NodeAnimator {
   initializeNodes() {
     this.nodes = {
       hips: this.scene.getNodeByName("mixamorig:Hips"),
+
+      spine1: this.scene.getNodeByName("mixamorig:Spine1"),
+      spine2: this.scene.getNodeByName("mixamorig:Spine2"),
+
+      neck: this.scene.getNodeByName("mixamorig:Neck"),
+      head: this.scene.getNodeByName("mixamorig:Head"),
+
+      leftShoulder: this.scene.getNodeByName("mixamorig:LeftShoulder"),
+      rightShoulder: this.scene.getNodeByName("mixamorig:RightShoulder"),
+
+      leftArm: this.scene.getNodeByName("mixamorig:LeftArm"),
+      rightArm: this.scene.getNodeByName("mixamorig:RightArm"),
+
+      leftForeArm: this.scene.getNodeByName("mixamorig:LeftForeArm"),
+      rightForeArm: this.scene.getNodeByName("mixamorig:RightForeArm"),
+
+      leftHand: this.scene.getNodeByName("mixamorig:LeftHand"),
+      rightHand: this.scene.getNodeByName("mixamorig:RightHand"),
+
+      leftUpLeg: this.scene.getNodeByName("mixamorig:LeftUpLeg"),
       rightUpLeg: this.scene.getNodeByName("mixamorig:RightUpLeg"),
-      // additional node initialization
+
+      leftLeg: this.scene.getNodeByName("mixamorig:LeftLeg"),
+      rightLeg: this.scene.getNodeByName("mixamorig:RightLeg"),
     };
 
     // // initialize
@@ -25,16 +47,100 @@ export class NodeAnimator {
   defineJointLimits() {
     return {
       hips: {
-        x: [0, 0],
-        y: [-45, 45],
+        x: [0.74, 0.74],
+        y: [0, 0],
         z: [0, 0],
       },
+
+      spine1: {
+        x: [10, 50],
+        y: [-50, 50],
+        z: [-10, 10],
+      },
+
+      spine2: {
+        x: [-30, 30],
+        y: [-50, 50],
+        z: [-10, 10],
+      },
+
+      neck: {
+        x: [-20, 20],
+        y: [-50, 50],
+        z: [-20, 20],
+      },
+
+      head: {
+        x: [-20, 20],
+        y: [-50, 50],
+        z: [-20, 20],
+      },
+
+      leftShoulder: {
+        x: [0, 80],
+        y: [150, 210],
+        z: [30, 140],
+      },
+      rightShoulder: {
+        x: [0, 80],
+        y: [150, 210],
+        z: [-150, 0],
+      },
+
+      leftArm: {
+        x: [-50, 50],
+        y: [-80, 50],
+        z: [-50, 50],
+      },
+      rightArm: {
+        x: [-50, 50],
+        y: [-80, 50],
+        z: [-50, 50],
+      },
+
+      leftForeArm: {
+        x: [-50, 50],
+        y: [-50, 50],
+        z: [0, 100],
+      },
+      rightForeArm: {
+        x: [-50, 50],
+        y: [-50, 50],
+        z: [-100, 0],
+      },
+
+      leftHand: {
+        x: [-50, 50],
+        y: [-50, 50],
+        z: [-30, 30],
+      },
+      rightHand: {
+        x: [-50, 50],
+        y: [-50, 50],
+        z: [-30, 30],
+      },
+
+      leftUpLeg: {
+        x: [-40, 40],
+        y: [-30, 50],
+        z: [180, 240],
+      },
       rightUpLeg: {
-        x: [0, 0],
+        x: [-40, 40],
         y: [-30, 50],
         z: [120, 180],
       },
-      // additioanl limits??
+
+      leftLeg: {
+        x: [-110, 0],
+        y: [0, 0],
+        z: [0, 0],
+      },
+      rightLeg: {
+        x: [-110, 0],
+        y: [0, 0],
+        z: [0, 0],
+      },
     };
   }
 
@@ -92,13 +198,17 @@ export class NodeAnimator {
   }
 
   startAnimation(bpm) {
-    const frameDuration = 60000 / bpm;
+    const frameDuration = Math.round(60000 / bpm);
+    console.log("frameDuration:", frameDuration);
     let lastFrameTime = performance.now();
+    this.currentPose = this.createRandomPose();
+    this.applyRandomPose(this.currentPose);
 
     const animate = (time) => {
       if (time - lastFrameTime >= frameDuration) {
-        const randomPose = this.createRandomPose();
-        this.applyRandomPose(randomPose);
+        const newPose = this.createRandomPose();
+        this.applyRandomPose(newPose);
+        this.currentPose = newPose;
         lastFrameTime = time;
       }
       this.animationFrameId = requestAnimationFrame(animate);

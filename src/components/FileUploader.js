@@ -32,7 +32,7 @@ export class FileUploader {
               this.sceneManager.linkBonesToNodes(result.skeletons[0]);
 
               this.sceneManager.addMesh(result.meshes[0]);
-              this.sceneManager.scene.debugLayer.show();
+              // this.sceneManager.scene.debugLayer.show();
             })
             .catch((error) => console.error("Error loading model:", error))
         )
