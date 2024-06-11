@@ -1,10 +1,14 @@
 export class NodeAnimator {
   constructor(scene) {
     this.scene = scene;
+    this.animationGroups = [];
+    this.boneConfig = this.defineBoneConfigs();
     this.nodes = {};
     this.initialPose = {};
     this.jointLimits = this.defineJointLimits();
     this.intervalId = null;
+
+    this.storedIK = null; // 나중에 없애. gui.
   }
 
   initializeNodes() {
@@ -159,93 +163,167 @@ export class NodeAnimator {
     }
   }
 
-  getRandomRotation(min, max) {
-    return Math.random() * (max - min) + min;
+  defineBoneConfigs() {
+    return {
+      LeftForeArm: {
+        targetPosition: { x: 1, y: 1.4, z: 0 },
+        poleTargetPosition: { x: 0, y: 3, z: 5 },
+        poleAngle: 0.1,
+        slerpAmount: 0.3,
+        range: {
+          x: { min: 0.3, max: 0.8 },
+          y: { min: 0.7, max: 2 },
+          z: { min: -0.3, max: 0.3 },
+        },
+      },
+      // additional...
+    };
   }
 
-  createRandomPose() {
-    const pose = {};
-    const r = Math.PI / 180; // radian
-    for (const nodeName in this.jointLimits) {
-      const limits = this.jointLimits[nodeName];
-      pose[nodeName] = new BABYLON.Vector3(
-        this.getRandomRotation(limits.x[0] * r, limits.x[1] * r),
-        this.getRandomRotation(limits.y[0] * r, limits.y[1] * r),
-        this.getRandomRotation(limits.z[0] * r, limits.z[1] * r)
+  getRandomPosition(range) {
+    return Math.random() * (range.max - range.min) + range.min;
+  }
+
+  setupBoneIK(scene, skeleton, mesh, boneName, config) {
+    const bone = skeleton.bones.find((b) => b.name === `mixamorig:${boneName}`);
+    if (!bone) {
+      console.error(`Bone ${boneName} not found in skeleton`);
+      return;
+    }
+
+    const target = BABYLON.MeshBuilder.CreateSphere(
+      "ikTarget_" + boneName,
+      { diameter: 0.1 },
+      scene
+    );
+    const poleTarget = BABYLON.MeshBuilder.CreateSphere(
+      "poleTarget_" + boneName,
+      { diameter: 0.3 },
+      scene
+    );
+
+    target.parent = mesh;
+    poleTarget.parent = mesh;
+
+    target.position = new BABYLON.Vector3(
+      config.targetPosition.x,
+      config.targetPosition.y,
+      config.targetPosition.z
+    );
+    poleTarget.position = new BABYLON.Vector3(
+      config.poleTargetPosition.x,
+      config.poleTargetPosition.y,
+      config.poleTargetPosition.z
+    );
+
+    const ikController = new BABYLON.BoneIKController(mesh, bone, {
+      targetMesh: target,
+      poleTargetMesh: poleTarget,
+      poleAngle: config.poleAngle,
+      slerpAmount: config.slerpAmount,
+    });
+
+    // later delete. for gui.
+    if (bone.name === "mixamorig:LeftForeArm")
+      this.storedIK = [ikController, poleTarget, target];
+
+    scene.registerBeforeRender(() => {
+      ikController.update();
+    });
+
+    const updateRandomTargetPosition = () => {
+      target.position.x = this.getRandomPosition(config.range.x);
+      target.position.y = this.getRandomPosition(config.range.y);
+      target.position.z = this.getRandomPosition(config.range.z);
+    };
+
+    setInterval(() => updateRandomTargetPosition(), 1000);
+  }
+
+  initializeBoneAnimations(scene, skeleton, mesh) {
+    for (const boneName in this.boneConfig) {
+      this.setupBoneIK(
+        scene,
+        skeleton,
+        mesh,
+        boneName,
+        this.boneConfig[boneName]
       );
     }
-    return pose;
+
+    if (this.storedIK && this.storedIK.length > 0) {
+      var gui = new dat.GUI();
+      gui.domElement.style.marginTop = "100px";
+      gui.domElement.id = "datGUI";
+      const ikController = this.storedIK[0];
+      const poleTarget = this.storedIK[1];
+      const target = this.storedIK[2];
+
+      gui.add(ikController, "poleAngle", -Math.PI, Math.PI);
+      gui.add(ikController, "maxAngle", 0, 2 * Math.PI);
+      gui.add(poleTarget.position, "x", -100, 100).name("pole target x");
+      gui.add(poleTarget.position, "y", -100, 100).name("pole target y");
+      gui.add(poleTarget.position, "z", -100, 100).name("pole target z");
+      gui.add(target.position, "x", -100, 100).name("target target x");
+      gui.add(target.position, "y", -100, 100).name("target target y");
+      gui.add(target.position, "z", -100, 100).name("target target z");
+    } else {
+      console.warn("No IK controller stored for GUI setup.");
+    }
+    // 나중에 없앨 gui
   }
 
-  applyRandomPose(randomPose) {
-    console.log("Applying pose: ", randomPose);
-    Object.keys(randomPose).forEach((nodeName) => {
-      const node = this.nodes[nodeName];
-      if (node) {
-        // create animation
-        const anim = new BABYLON.Animation(
-          "anim_" + nodeName,
-          "rotation",
-          30, // FPS
-          BABYLON.Animation.ANIMATIONTYPE_VECTOR3,
-          BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE
+  applyAnimationToModel(skeleton) {
+    this.animationGroups.forEach((animationGroup) => {
+      // 애니메이션 그룹의 각 애니메이션을 모델의 해당 본에 적용
+      animationGroup.targetedAnimations.forEach((targetedAnimation) => {
+        const targetNode = this.scene.getNodeByName(
+          targetedAnimation.target.name
         );
-
-        const easingFunction = new BABYLON.CubicEase();
-        easingFunction.setEasingMode(
-          BABYLON.EasingFunction.EASINGMODE_EASEINOUT
-        );
-
-        anim.setEasingFunction(easingFunction);
-
-        const keys = [
-          { frame: 0, value: node.rotation.clone() },
-          { frame: 30, value: randomPose[nodeName] },
-        ];
-
-        anim.setKeys(keys);
-
-        // start animation
-        node.animations = [anim];
-        this.scene.beginAnimation(node, 0, 30, false);
-      }
+        if (targetNode) {
+          animationGroup.addTargetedAnimation(
+            targetedAnimation.animation,
+            targetNode
+          );
+        } else {
+          console.warn(`Node ${targetedAnimation.target.name} not found.`);
+        }
+      });
     });
   }
 
-  startAnimation(bpm) {
-    const frameDuration = Math.round(60000 / bpm);
-    console.log("frameDuration:", frameDuration);
-    let lastFrameTime = performance.now();
-    this.currentPose = this.createRandomPose();
-    this.applyRandomPose(this.currentPose);
+  setAnimationSpeed(bpm) {
+    const beatsPerMinute = bpm;
+    const speedRatio = beatsPerMinute / 60 / 1.92;
+    this.animationGroups.forEach((group) => {
+      group.speedRatio = speedRatio;
+    });
+  }
 
-    const animate = (time) => {
-      if (time - lastFrameTime >= frameDuration) {
-        const newPose = this.createRandomPose();
-        this.applyRandomPose(newPose);
-        this.currentPose = newPose;
-        lastFrameTime = time;
-      }
-      this.animationFrameId = requestAnimationFrame(animate);
-    };
-
-    this.stopAnimation();
-    this.animationFrameId = requestAnimationFrame(animate);
+  startAnimation() {
+    this.animationGroups.forEach((group) => {
+      group.play(true);
+      group.targetedAnimations.forEach((targetedAnimation) => {
+        console.log(
+          `Target: ${targetedAnimation.target.name}, Animation Type: ${targetedAnimation.animation.animationType}`
+        );
+        console.log(
+          `Key Frames: ${targetedAnimation.animation.getKeys().length}`
+        );
+      });
+      console.log("Animation group started:", group.name);
+    });
   }
 
   pauseAnimation() {
-    if (this.animationFrameId) {
-      cancelAnimationFrame(this.animationFrameId);
-      this.animationFrameId = null;
-      console.log("Animation paused.");
-    }
+    this.animationGroups.forEach((group) => {
+      group.pause();
+    });
   }
 
   stopAnimation() {
-    if (this.animationFrameId) {
-      cancelAnimationFrame(this.animationFrameId);
-      this.animationFrameId = null;
-      console.log("Animation stopped.");
-    }
+    this.animationGroups.forEach((group) => {
+      group.stop();
+    });
   }
 }

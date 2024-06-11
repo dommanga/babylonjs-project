@@ -12,6 +12,7 @@ const port = 3000;
 const upload = multer({ dest: "uploads/" });
 
 app.use(express.static(path.join(__dirname, "dist")));
+app.use(express.static(path.join(__dirname, "public")));
 
 app.post("/upload", upload.single("file"), (req, res) => {
   const fbxFilePath = req.file.path;

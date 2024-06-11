@@ -4,6 +4,7 @@ export class SceneManager {
     this.engine = new BABYLON.Engine(this.canvas, true);
     this.scene = new BABYLON.Scene(this.engine);
     this.createScene();
+    this.storedAnimations = [];
     this.engine.runRenderLoop(() => this.scene.render());
     window.addEventListener("resize", () => this.engine.resize());
   }
@@ -20,7 +21,7 @@ export class SceneManager {
     camera.attachControl(this.canvas, true);
 
     // Zoom lock
-    const zoomLockDistance = 2; // fixed distance
+    const zoomLockDistance = 3; // fixed distance
     camera.lowerRadiusLimit = zoomLockDistance;
     camera.upperRadiusLimit = zoomLockDistance;
 
@@ -28,6 +29,24 @@ export class SceneManager {
       "light",
       new BABYLON.Vector3(1, 1, 0),
       this.scene
+    );
+  }
+
+  loadAnimationFromGLB(url, fileName) {
+    BABYLON.SceneLoader.ImportMesh(
+      "",
+      url,
+      fileName,
+      this.scene,
+      (meshes, particleSystems, skeletons, animationGroups) => {
+        // Animation groups
+        this.storedAnimations = animationGroups;
+        console.log("Animation groups extracted and stored.");
+
+        meshes.forEach((mesh) => {
+          mesh.dispose(); // remove mesh
+        });
+      }
     );
   }
 
