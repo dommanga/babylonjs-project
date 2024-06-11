@@ -7,8 +7,7 @@ export class NodeAnimator {
     this.initialPose = {};
     this.jointLimits = this.defineJointLimits();
     this.intervalId = null;
-
-    this.storedIK = null; // 나중에 없애. gui.
+    this.bpm = null;
   }
 
   initializeNodes(mesh, skeleton) {
@@ -39,22 +38,6 @@ export class NodeAnimator {
       leftLeg: this.scene.getNodeByName("mixamorig:LeftLeg"),
       rightLeg: this.scene.getNodeByName("mixamorig:RightLeg"),
     };
-
-    // specific modification
-    Object.keys(this.nodes).forEach((nodeName) => {
-      const node = this.nodes[nodeName];
-      if (node) {
-        let initialRotation = node.rotation.clone();
-        if (nodeName === "leftUpLeg" || nodeName === "rightUpLeg") {
-          initialRotation.z = Math.PI;
-        } else if (nodeName === "leftShoulder") {
-          initialRotation.z = -Math.PI / 2;
-        } else if (nodeName === "rightShoulder") {
-          initialRotation.z = Math.PI / 2;
-        }
-        this.initialPose[nodeName] = initialRotation;
-      }
-    });
   }
 
   defineJointLimits() {
@@ -177,7 +160,7 @@ export class NodeAnimator {
           y: { min: 0.7, max: 2 },
           z: { min: -0.3, max: 0.3 },
         },
-        bendAxis: [-1, 0, 0],
+        bendAxis: { x: -1, y: 0, z: 0 },
       },
       RightForeArm: {
         targetPosition: { x: -1, y: 1.4, z: 0 },
@@ -189,7 +172,7 @@ export class NodeAnimator {
           y: { min: 0.7, max: 2 },
           z: { min: -0.3, max: 0.3 },
         },
-        bendAxis: [-1, 0, 0],
+        bendAxis: { x: -1, y: 0, z: 0 },
       },
     };
   }
@@ -198,12 +181,31 @@ export class NodeAnimator {
     return Math.random() * (range.max - range.min) + range.min;
   }
 
+  applyEasingToPosition(
+    targetPosition,
+    currentPosition,
+    easingFunction,
+    deltaTime
+  ) {
+    return BABYLON.Vector3.Lerp(
+      currentPosition,
+      targetPosition,
+      easingFunction(deltaTime)
+    );
+  }
+
   setupBoneIK(scene, skeleton, mesh, boneName, config, bpm) {
     const bone = skeleton.bones.find((b) => b.name === `mixamorig:${boneName}`);
     if (!bone) {
       console.error(`Bone ${boneName} not found in skeleton`);
       return;
     }
+    var spineBone = skeleton.bones.find(
+      (bone) => bone.name === "mixamorig:Spine1"
+    );
+
+    const easingFunction = (t) => t * t * (3 - 2 * t);
+    // const easingFunction = (t) => 0.5 - Math.cos(t * Math.PI) / 2;
 
     const target = BABYLON.MeshBuilder.CreateSphere(
       "ikTarget_" + boneName,
@@ -215,6 +217,8 @@ export class NodeAnimator {
       { diameter: 0.3 },
       scene
     );
+    target.setEnabled(false);
+    poleTarget.setEnabled(false);
 
     target.parent = mesh;
     poleTarget.parent = mesh;
@@ -230,27 +234,17 @@ export class NodeAnimator {
       config.poleTargetPosition.z
     );
 
-    const bendAxisConfig = {
-      x: config.bendAxis[0],
-      y: config.bendAxis[1],
-      z: config.bendAxis[2],
-    };
-
     const ikController = new BABYLON.BoneIKController(mesh, bone, {
       targetMesh: target,
       poleTargetMesh: poleTarget,
       poleAngle: config.poleAngle.max,
       slerpAmount: config.slerpAmount,
       bendAxis: new BABYLON.Vector3(
-        bendAxisConfig.x,
-        bendAxisConfig.y,
-        bendAxisConfig.z
+        config.bendAxis.x,
+        config.bendAxis.y,
+        config.bendAxis.z
       ),
     });
-
-    // later delete. for gui.
-    // if (bone.name === "mixamorig:LeftForeArm")
-    //   this.storedIK = [ikController, poleTarget, target, bendAxisConfig];
 
     let relativePosition = new BABYLON.Vector3(
       config.targetPosition.x,
@@ -258,30 +252,45 @@ export class NodeAnimator {
       config.targetPosition.z
     );
 
-    var spineBone = skeleton.bones.find(
-      (bone) => bone.name === "mixamorig:Spine1"
-    );
+    let currentTargetPosition = new BABYLON.Vector3();
+    let newTargetPosition = new BABYLON.Vector3();
+    let isTransitioning = false;
+    let transitionStartTime = 0;
+    const transitionDuration = 60000 / bpm;
 
     scene.registerBeforeRender(() => {
       ikController.update();
 
-      var spinePosition = spineBone.getAbsolutePosition();
+      if (isTransitioning) {
+        const elapsedTime = scene.getEngine().getDeltaTime();
+        const progress = Math.min(
+          (Date.now() - transitionStartTime) / transitionDuration,
+          1
+        );
+        target.position = BABYLON.Vector3.Lerp(
+          currentTargetPosition,
+          newTargetPosition,
+          easingFunction(progress)
+        );
 
-      target.position.x = spinePosition.x + relativePosition.x;
-      target.position.y = relativePosition.y;
-      target.position.z = spinePosition.z + relativePosition.z;
+        if (progress >= 1) {
+          isTransitioning = false;
+        }
+      }
     });
 
     const updateRandomTargetPosition = () => {
-      // calculate random pos
-      let randomX = this.getRandomPosition(config.range.x);
-      let randomY = this.getRandomPosition(config.range.y);
-      let randomZ = this.getRandomPosition(config.range.z);
+      currentTargetPosition.copyFrom(target.position);
 
-      // update relative pos
-      relativePosition.x = randomX;
-      relativePosition.y = randomY;
-      relativePosition.z = randomZ;
+      var spinePosition = spineBone.getAbsolutePosition();
+      newTargetPosition.x =
+        spinePosition.x + this.getRandomPosition(config.range.x);
+      newTargetPosition.y = this.getRandomPosition(config.range.y);
+      newTargetPosition.z =
+        spinePosition.z + this.getRandomPosition(config.range.z);
+
+      isTransitioning = true;
+      transitionStartTime = Date.now();
     };
 
     function updatePoleAngle() {
@@ -294,10 +303,10 @@ export class NodeAnimator {
     setInterval(() => {
       updateRandomTargetPosition();
       updatePoleAngle();
-    }, 60000 / bpm);
+    }, transitionDuration);
   }
 
-  initializeBoneAnimations(scene, bpm) {
+  initializeBoneAnimations(scene) {
     for (const boneName in this.boneConfig) {
       this.setupBoneIK(
         scene,
@@ -305,35 +314,13 @@ export class NodeAnimator {
         this.mesh,
         boneName,
         this.boneConfig[boneName],
-        bpm
+        this.bpm
       );
     }
-
-    // if (this.storedIK && this.storedIK.length > 0) {
-    //   var gui = new dat.GUI();
-    //   gui.domElement.style.marginTop = "100px";
-    //   gui.domElement.id = "datGUI";
-    //   const ikController = this.storedIK[0];
-    //   const poleTarget = this.storedIK[1];
-    //   const target = this.storedIK[2];
-
-    //   gui.add(ikController, "poleAngle", -Math.PI, Math.PI);
-    //   gui.add(ikController, "maxAngle", 0, 2 * Math.PI);
-    //   gui.add(poleTarget.position, "x", -100, 100).name("pole target x");
-    //   gui.add(poleTarget.position, "y", -100, 100).name("pole target y");
-    //   gui.add(poleTarget.position, "z", -100, 100).name("pole target z");
-    //   gui.add(target.position, "x", -100, 100).name("target target x");
-    //   gui.add(target.position, "y", -100, 100).name("target target y");
-    //   gui.add(target.position, "z", -100, 100).name("target target z");
-    // } else {
-    //   console.warn("No IK controller stored for GUI setup.");
-    // }
-    // 나중에 없앨 gui
   }
 
   applyAnimationToModel(skeleton) {
     this.animationGroups.forEach((animationGroup) => {
-      // 애니메이션 그룹의 각 애니메이션을 모델의 해당 본에 적용
       animationGroup.targetedAnimations.forEach((targetedAnimation) => {
         const targetNode = this.scene.getNodeByName(
           targetedAnimation.target.name
@@ -351,8 +338,8 @@ export class NodeAnimator {
   }
 
   setAnimationSpeed(bpm) {
-    const beatsPerMinute = bpm;
-    const speedRatio = beatsPerMinute / 60 / 1.7;
+    this.bpm = bpm;
+    const speedRatio = bpm / 60 / 1.92;
     this.animationGroups.forEach((group) => {
       group.speedRatio = speedRatio;
     });

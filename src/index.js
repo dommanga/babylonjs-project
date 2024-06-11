@@ -5,7 +5,7 @@ import { NodeAnimator } from "./components/NodeAnimator";
 
 window.addEventListener("DOMContentLoaded", () => {
   const sceneManager = new SceneManager("renderCanvas");
-  sceneManager.loadAnimationFromGLB("", "animation_2step.glb");
+  sceneManager.loadAnimationFromGLB("", "animation_idle.glb");
   const nodeAnimator = new NodeAnimator(sceneManager.scene);
   const fileUploader = new FileUploader(sceneManager, nodeAnimator);
   const audioManager = new AudioManager(sceneManager, nodeAnimator);
