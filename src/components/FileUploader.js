@@ -36,16 +36,14 @@ export class FileUploader {
               const skeleton = result.skeletons[0];
 
               this.sceneManager.addMesh(mesh);
-
               this.sceneManager.linkBonesToNodes(skeleton);
-              this.animator.initializeNodes(mesh, skeleton); // 나중에 이름 바꾸기!! - 노드는 안쓸거니까 아마??
+
+              this.animator.storeModelData(mesh, skeleton);
 
               // 이코드 나중에 animator 안의 함수 쓰는걸로 바꾸기..!!! (클래스 안의 변수는 클래스 메소드로 바꾸자)
               this.animator.animationGroups =
                 this.sceneManager.storedAnimations;
               this.animator.applyAnimationToModel(skeleton);
-
-              // this.sceneManager.scene.debugLayer.show();
             })
             .catch((error) => console.error("Error loading model:", error))
         )

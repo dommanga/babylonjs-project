@@ -1,155 +1,46 @@
 export class NodeAnimator {
   constructor(scene) {
     this.scene = scene;
+    this.mesh = null;
+    this.skeleton = null;
     this.animationGroups = [];
     this.boneConfig = this.defineBoneConfigs();
-    this.nodes = {};
     this.initialPose = {};
-    this.jointLimits = this.defineJointLimits();
     this.intervalId = null;
     this.bpm = null;
   }
 
-  initializeNodes(mesh, skeleton) {
+  storeModelData(mesh, skeleton) {
     this.mesh = mesh;
     this.skeleton = skeleton;
-    this.nodes = {
-      spine1: this.scene.getNodeByName("mixamorig:Spine1"),
-      spine2: this.scene.getNodeByName("mixamorig:Spine2"),
-
-      neck: this.scene.getNodeByName("mixamorig:Neck"),
-      head: this.scene.getNodeByName("mixamorig:Head"),
-
-      leftShoulder: this.scene.getNodeByName("mixamorig:LeftShoulder"),
-      rightShoulder: this.scene.getNodeByName("mixamorig:RightShoulder"),
-
-      leftArm: this.scene.getNodeByName("mixamorig:LeftArm"),
-      rightArm: this.scene.getNodeByName("mixamorig:RightArm"),
-
-      leftForeArm: this.scene.getNodeByName("mixamorig:LeftForeArm"),
-      rightForeArm: this.scene.getNodeByName("mixamorig:RightForeArm"),
-
-      leftHand: this.scene.getNodeByName("mixamorig:LeftHand"),
-      rightHand: this.scene.getNodeByName("mixamorig:RightHand"),
-
-      leftUpLeg: this.scene.getNodeByName("mixamorig:LeftUpLeg"),
-      rightUpLeg: this.scene.getNodeByName("mixamorig:RightUpLeg"),
-
-      leftLeg: this.scene.getNodeByName("mixamorig:LeftLeg"),
-      rightLeg: this.scene.getNodeByName("mixamorig:RightLeg"),
-    };
-  }
-
-  defineJointLimits() {
-    return {
-      hips: {
-        x: [0.74, 0.74],
-        y: [0, 0],
-        z: [0, 0],
-      },
-
-      spine1: {
-        x: [10, 50],
-        y: [-50, 50],
-        z: [-10, 10],
-      },
-
-      spine2: {
-        x: [-30, 30],
-        y: [-50, 50],
-        z: [-10, 10],
-      },
-
-      neck: {
-        x: [-20, 20],
-        y: [-50, 50],
-        z: [-20, 20],
-      },
-
-      head: {
-        x: [-20, 20],
-        y: [-50, 50],
-        z: [-20, 20],
-      },
-
-      leftShoulder: {
-        x: [0, 80],
-        y: [150, 210],
-        z: [30, 140],
-      },
-      rightShoulder: {
-        x: [0, 80],
-        y: [150, 210],
-        z: [-150, 0],
-      },
-
-      leftArm: {
-        x: [-50, 50],
-        y: [-80, 50],
-        z: [-50, 50],
-      },
-      rightArm: {
-        x: [-50, 50],
-        y: [-80, 50],
-        z: [-50, 50],
-      },
-
-      leftForeArm: {
-        x: [-50, 50],
-        y: [-50, 50],
-        z: [0, 100],
-      },
-      rightForeArm: {
-        x: [-50, 50],
-        y: [-50, 50],
-        z: [-100, 0],
-      },
-
-      leftHand: {
-        x: [-50, 50],
-        y: [-50, 50],
-        z: [-30, 30],
-      },
-      rightHand: {
-        x: [-50, 50],
-        y: [-50, 50],
-        z: [-30, 30],
-      },
-
-      leftUpLeg: {
-        x: [-40, 40],
-        y: [-30, 50],
-        z: [180, 240],
-      },
-      rightUpLeg: {
-        x: [-40, 40],
-        y: [-30, 50],
-        z: [120, 180],
-      },
-
-      leftLeg: {
-        x: [-110, 0],
-        y: [0, 0],
-        z: [0, 0],
-      },
-      rightLeg: {
-        x: [-110, 0],
-        y: [0, 0],
-        z: [0, 0],
-      },
-    };
-  }
-
-  resetToInitialPose() {
-    for (const nodeName in this.initialPose) {
-      const node = this.nodes[nodeName];
-      const initialState = this.initialPose[nodeName];
-      node.rotation = initialState.clone();
-    }
   }
 
   defineBoneConfigs() {
     return {
+      Neck: {
+        targetPosition: { x: 0, y: 3, z: 1 },
+        poleTargetPosition: { x: 3, y: 5, z: 3 },
+        poleAngle: { min: -2.5, max: -2.5 },
+        slerpAmount: 0.3,
+        range: {
+          x: { min: -0.3, max: 0.3 },
+          y: { min: 2, max: 3 },
+          z: { min: -0.2, max: 0.3 },
+        },
+        bendAxis: { x: -1, y: 0, z: 0 },
+      },
+      Spine1: {
+        targetPosition: { x: 0, y: 2, z: 1 },
+        poleTargetPosition: { x: 3, y: 5, z: 3 },
+        poleAngle: { min: -2.6, max: -2.4 },
+        slerpAmount: 0.3,
+        range: {
+          x: { min: -0.3, max: 0.3 },
+          y: { min: 1.5, max: 2 },
+          z: { min: -0.1, max: 0.1 },
+        },
+        bendAxis: { x: -1, y: 0, z: 0 },
+      },
       LeftForeArm: {
         targetPosition: { x: 1, y: 1.4, z: 0 },
         poleTargetPosition: { x: 0, y: 3, z: 5 },
@@ -174,38 +65,49 @@ export class NodeAnimator {
         },
         bendAxis: { x: -1, y: 0, z: 0 },
       },
+      LeftLeg: {
+        targetPosition: { x: 0.1, y: 0, z: 0 },
+        poleTargetPosition: { x: 0, y: 2, z: 5 },
+        poleAngle: { min: -1.7, max: -1.3 },
+        slerpAmount: 0.3,
+        range: {
+          x: { min: 0.1, max: 0.2 },
+          y: { min: 0, max: 0.5 },
+          z: { min: -0.2, max: 0.2 },
+        },
+        bendAxis: { x: 1, y: 0, z: 0 },
+      },
+      RightLeg: {
+        targetPosition: { x: -0.1, y: 0, z: 0 },
+        poleTargetPosition: { x: 0, y: 2, z: 5 },
+        poleAngle: { min: -1.4, max: -0.9 },
+        slerpAmount: 0.3,
+        range: {
+          x: { min: -0.2, max: -0.1 },
+          y: { min: 0, max: 0.5 },
+          z: { min: -0.2, max: 0.2 },
+        },
+        bendAxis: { x: 1, y: 0, z: 0 },
+      },
     };
   }
 
   getRandomPosition(range) {
     return Math.random() * (range.max - range.min) + range.min;
   }
-
-  applyEasingToPosition(
-    targetPosition,
-    currentPosition,
-    easingFunction,
-    deltaTime
-  ) {
-    return BABYLON.Vector3.Lerp(
-      currentPosition,
-      targetPosition,
-      easingFunction(deltaTime)
-    );
+  getRandomPoleAngle(angle) {
+    return Math.random() * (angle.max - angle.min) + angle.min;
   }
 
   setupBoneIK(scene, skeleton, mesh, boneName, config, bpm) {
     const bone = skeleton.bones.find((b) => b.name === `mixamorig:${boneName}`);
-    if (!bone) {
-      console.error(`Bone ${boneName} not found in skeleton`);
-      return;
-    }
+
     var spineBone = skeleton.bones.find(
       (bone) => bone.name === "mixamorig:Spine1"
     );
 
     const easingFunction = (t) => t * t * (3 - 2 * t);
-    // const easingFunction = (t) => 0.5 - Math.cos(t * Math.PI) / 2;
+    const easingFunction_sin = (t) => 0.5 - Math.cos(t * Math.PI) / 2;
 
     const target = BABYLON.MeshBuilder.CreateSphere(
       "ikTarget_" + boneName,
@@ -217,8 +119,8 @@ export class NodeAnimator {
       { diameter: 0.3 },
       scene
     );
-    target.setEnabled(false);
-    poleTarget.setEnabled(false);
+    target.setEnabled(true);
+    poleTarget.setEnabled(true);
 
     target.parent = mesh;
     poleTarget.parent = mesh;
@@ -246,14 +148,11 @@ export class NodeAnimator {
       ),
     });
 
-    let relativePosition = new BABYLON.Vector3(
-      config.targetPosition.x,
-      config.targetPosition.y,
-      config.targetPosition.z
-    );
-
     let currentTargetPosition = new BABYLON.Vector3();
     let newTargetPosition = new BABYLON.Vector3();
+    let currentPoleAngle = ikController.poleAngle;
+    let newPoleAngle = this.getRandomPoleAngle(config.poleAngle);
+
     let isTransitioning = false;
     let transitionStartTime = 0;
     const transitionDuration = 60000 / bpm;
@@ -272,9 +171,14 @@ export class NodeAnimator {
           newTargetPosition,
           easingFunction(progress)
         );
-
+        ikController.poleAngle = BABYLON.Scalar.Lerp(
+          currentPoleAngle,
+          newPoleAngle,
+          easingFunction_sin(progress)
+        );
         if (progress >= 1) {
           isTransitioning = false;
+          currentPoleAngle = newPoleAngle;
         }
       }
     });
@@ -293,12 +197,11 @@ export class NodeAnimator {
       transitionStartTime = Date.now();
     };
 
-    function updatePoleAngle() {
-      const min = config.poleAngle.min;
-      const max = config.poleAngle.max;
-      const randomAngle = Math.random() * (max - min) + min;
-      ikController.poleAngle = randomAngle;
-    }
+    const updatePoleAngle = () => {
+      newPoleAngle = this.getRandomPoleAngle(config.poleAngle);
+      transitionStartTime = Date.now();
+      isTransitioning = true;
+    };
 
     setInterval(() => {
       updateRandomTargetPosition();

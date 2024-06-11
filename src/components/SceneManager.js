@@ -63,18 +63,7 @@ export class SceneManager {
     const rootMesh = mesh;
     rootMesh.position = new BABYLON.Vector3(0, 0, 0);
     rootMesh.scaling = new BABYLON.Vector3(0.7, 0.7, 0.7);
-    // this.scene.addMesh(rootMesh);
   }
-
-  // startAnimation(bpm) {
-  //   if (this.animationGroups && this.animationGroups.length > 0 && bpm) {
-  //     // this.configureAnimations(bpm);
-  //     this.animationGroups.forEach((group) => group.start(true));
-  //     console.log(`Animation started with BPM: ${bpm}`);
-  //   } else {
-  //     console.log("Waiting for BPM to start animation...");
-  //   }
-  // }
 
   getScene() {
     return this.scene;
