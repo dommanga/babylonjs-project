@@ -15,7 +15,7 @@ export class SceneManager {
       -Math.PI / 2,
       Math.PI / 2,
       2,
-      new BABYLON.Vector3(0, 0, 0),
+      new BABYLON.Vector3(0, 0.7, 0),
       this.scene
     );
     camera.attachControl(this.canvas, true);
@@ -61,7 +61,7 @@ export class SceneManager {
 
   addMesh(mesh) {
     const rootMesh = mesh;
-    rootMesh.position = new BABYLON.Vector3(0, -0.7, 0);
+    rootMesh.position = new BABYLON.Vector3(0, 0, 0);
     rootMesh.scaling = new BABYLON.Vector3(0.7, 0.7, 0.7);
     // this.scene.addMesh(rootMesh);
   }

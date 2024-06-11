@@ -88,6 +88,10 @@ export class AudioManager {
       this.sourceNode.start(0, this.pausedAt);
       this.startTime = this.audioContext.currentTime - this.pausedAt;
       this.animator.startAnimation();
+      this.animator.initializeBoneAnimations(
+        this.sceneManager.getScene(),
+        this.bpm
+      );
 
       console.log("Audio playing from:", this.pausedAt);
     }
