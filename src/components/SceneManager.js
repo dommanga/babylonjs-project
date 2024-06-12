@@ -4,9 +4,9 @@ export class SceneManager {
     this.engine = new BABYLON.Engine(this.canvas, true);
     this.scene = new BABYLON.Scene(this.engine);
     this.createScene();
-    this.storedAnimations = [];
     this.engine.runRenderLoop(() => this.scene.render());
     window.addEventListener("resize", () => this.engine.resize());
+    this.storedAnimations = [];
   }
 
   createScene() {
@@ -49,15 +49,6 @@ export class SceneManager {
         });
       }
     );
-  }
-
-  linkBonesToNodes(skeleton) {
-    skeleton.bones.forEach((bone) => {
-      const node = this.scene.getNodeByName(bone.name);
-      if (node) {
-        bone.linkedNode = node;
-      }
-    });
   }
 
   addMesh(mesh) {

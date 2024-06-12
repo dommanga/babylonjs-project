@@ -3,8 +3,8 @@ import { analyze } from "web-audio-beat-detector";
 export class AudioManager {
   constructor(sceneManager, nodeAnimator) {
     this.sceneManager = sceneManager;
-    this.soundInput = document.getElementById("soundInput");
     this.animator = nodeAnimator;
+    this.soundInput = document.getElementById("soundInput");
     this.bpm = null;
     this.playButton = document.getElementById("playButton");
     this.pauseButton = document.getElementById("pauseButton");
@@ -14,6 +14,7 @@ export class AudioManager {
     this.sourceNode = null;
     this.startTime = 0;
     this.pausedAt = 0;
+    this.stopped = false;
     this.setupEventListeners();
   }
 
@@ -31,11 +32,17 @@ export class AudioManager {
     if (files.length > 0) {
       const file = files[0];
       let fileName = file.name;
+
+      // extract song's title only
       const lastDotIndex = fileName.lastIndexOf(".");
       if (lastDotIndex > 0) {
         fileName = fileName.substring(0, lastDotIndex);
       }
-      document.querySelector(".sound-button").style.filter = "brightness(0.5)";
+
+      // disable sound uploading button
+      const sound_button = document.querySelector(".sound-button");
+      sound_button.style.filter = "brightness(0.5)";
+      sound_button.disabled = true;
       document.getElementById("musicUploadStatus").innerText = fileName;
 
       const reader = new FileReader();
@@ -57,12 +64,10 @@ export class AudioManager {
             analyze(this.audioBuffer)
               .then((bpm) => {
                 this.bpm = Math.round(bpm);
-                console.log("Detected BPM:", this.bpm);
                 document.getElementById(
                   "bpmDisplay"
                 ).innerText = `Detected BPM: ${this.bpm}`;
                 this.animator.setAnimationSpeed(this.bpm);
-                document.dispatchEvent(new CustomEvent("bpmDetected"));
               })
               .catch((err) => {
                 console.error("Error analyzing BPM:", error);
@@ -73,7 +78,6 @@ export class AudioManager {
           }
         );
       };
-
       reader.readAsArrayBuffer(file);
     }
   }
@@ -83,16 +87,18 @@ export class AudioManager {
       if (this.sourceNode) {
         this.sourceNode.stop(0);
       }
+
       this.sourceNode = this.audioContext.createBufferSource();
       this.sourceNode.buffer = this.audioBuffer;
       this.sourceNode.connect(this.audioContext.destination);
       this.sourceNode.start(0, this.pausedAt);
       this.startTime = this.audioContext.currentTime - this.pausedAt;
-      if (this.pausedAt > 0) {
+
+      if (this.pausedAt > 0 || this.stopped) {
         this.animator.resumeAnimation();
         console.log("Audio resumed from:", this.pausedAt);
       } else {
-        this.animator.startAnimation();
+        this.animator.startAnimation(); // set new IK
         console.log("Audio playing from start");
       }
     }
@@ -113,6 +119,7 @@ export class AudioManager {
       this.sourceNode.stop(0);
       this.sourceNode = null;
       this.pausedAt = 0;
+      this.stopped = true;
       this.animator.stopAnimation();
 
       console.log("Audio stopped...");

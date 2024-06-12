@@ -13,7 +13,11 @@ export class FileUploader {
     if (files.length > 0) {
       const file = files[0];
       const fileName = file.name;
-      document.querySelector(".file-button").style.filter = "brightness(0.5)";
+
+      // disable file uploading button
+      const file_button = document.querySelector(".file-button");
+      file_button.style.filter = "brightness(0.5)";
+      file_button.disabled = true;
 
       const formData = new FormData();
       formData.append("file", file);
@@ -32,19 +36,17 @@ export class FileUploader {
                 console.log("base animation stop.");
                 result.animationGroups.forEach((group) => group.stop());
               }
-              const mesh = result.meshes[0];
-              const skeleton = result.skeletons[0];
 
-              this.sceneManager.addMesh(mesh);
-              this.sceneManager.linkBonesToNodes(skeleton);
+              this.sceneManager.addMesh(result.meshes[0]);
 
-              this.animator.storeModelData(mesh, skeleton);
+              this.animator.storeModelData2Animator(
+                result.meshes[0],
+                result.skeletons[0]
+              );
 
-              // 이코드 나중에 animator 안의 함수 쓰는걸로 바꾸기..!!! (클래스 안의 변수는 클래스 메소드로 바꾸자)
-              this.animator.animationGroups =
-                this.sceneManager.storedAnimations;
-              this.animator.applyAnimationToModel(skeleton);
-              document.dispatchEvent(new CustomEvent("fileUploaded"));
+              this.animator.applyStoredAnimationToModel(
+                this.sceneManager.storedAnimations
+              );
             })
             .catch((error) => console.error("Error loading model:", error))
         )
