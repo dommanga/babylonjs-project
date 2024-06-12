@@ -44,6 +44,7 @@ export class FileUploader {
               this.animator.animationGroups =
                 this.sceneManager.storedAnimations;
               this.animator.applyAnimationToModel(skeleton);
+              document.dispatchEvent(new CustomEvent("fileUploaded"));
             })
             .catch((error) => console.error("Error loading model:", error))
         )

@@ -5,7 +5,7 @@ export class AudioManager {
     this.sceneManager = sceneManager;
     this.soundInput = document.getElementById("soundInput");
     this.animator = nodeAnimator;
-    this.bpm = 0;
+    this.bpm = null;
     this.playButton = document.getElementById("playButton");
     this.pauseButton = document.getElementById("pauseButton");
     this.stopButton = document.getElementById("stopButton");
@@ -62,6 +62,7 @@ export class AudioManager {
                   "bpmDisplay"
                 ).innerText = `Detected BPM: ${this.bpm}`;
                 this.animator.setAnimationSpeed(this.bpm);
+                document.dispatchEvent(new CustomEvent("bpmDetected"));
               })
               .catch((err) => {
                 console.error("Error analyzing BPM:", error);
@@ -87,10 +88,13 @@ export class AudioManager {
       this.sourceNode.connect(this.audioContext.destination);
       this.sourceNode.start(0, this.pausedAt);
       this.startTime = this.audioContext.currentTime - this.pausedAt;
-      this.animator.startAnimation();
-      this.animator.initializeBoneAnimations(this.sceneManager.getScene());
-
-      console.log("Audio playing from:", this.pausedAt);
+      if (this.pausedAt > 0) {
+        this.animator.resumeAnimation();
+        console.log("Audio resumed from:", this.pausedAt);
+      } else {
+        this.animator.startAnimation();
+        console.log("Audio playing from start");
+      }
     }
   }
 

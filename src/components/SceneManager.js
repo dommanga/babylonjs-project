@@ -21,15 +21,16 @@ export class SceneManager {
     camera.attachControl(this.canvas, true);
 
     // Zoom lock
-    const zoomLockDistance = 3; // fixed distance
+    const zoomLockDistance = 2.5; // fixed distance
     camera.lowerRadiusLimit = zoomLockDistance;
     camera.upperRadiusLimit = zoomLockDistance;
 
-    new BABYLON.HemisphericLight(
+    const light = new BABYLON.HemisphericLight(
       "light",
       new BABYLON.Vector3(1, 1, 0),
       this.scene
     );
+    light.intensity = 1.2;
   }
 
   loadAnimationFromGLB(url, fileName) {
