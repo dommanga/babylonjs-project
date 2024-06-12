@@ -13,7 +13,11 @@ export class FileUploader {
     if (files.length > 0) {
       const file = files[0];
       const fileName = file.name;
-      document.querySelector(".file-button").style.filter = "brightness(0.5)";
+
+      // disable file uploading button
+      const file_button = document.querySelector(".file-button");
+      file_button.style.filter = "brightness(0.5)";
+      file_button.disabled = true;
 
       const formData = new FormData();
       formData.append("file", file);
@@ -32,14 +36,17 @@ export class FileUploader {
                 console.log("base animation stop.");
                 result.animationGroups.forEach((group) => group.stop());
               }
+
               this.sceneManager.addMesh(result.meshes[0]);
 
-              this.sceneManager.linkBonesToNodes(result.skeletons[0]);
+              this.animator.storeModelData2Animator(
+                result.meshes[0],
+                result.skeletons[0]
+              );
 
-              this.animator.initializeNodes();
-              this.animator.resetToInitialPose();
-
-              // this.sceneManager.scene.debugLayer.show();
+              this.animator.applyStoredAnimationToModel(
+                this.sceneManager.storedAnimations
+              );
             })
             .catch((error) => console.error("Error loading model:", error))
         )

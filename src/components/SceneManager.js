@@ -6,6 +6,7 @@ export class SceneManager {
     this.createScene();
     this.engine.runRenderLoop(() => this.scene.render());
     window.addEventListener("resize", () => this.engine.resize());
+    this.storedAnimations = [];
   }
 
   createScene() {
@@ -14,48 +15,47 @@ export class SceneManager {
       -Math.PI / 2,
       Math.PI / 2,
       2,
-      new BABYLON.Vector3(0, 0, 0),
+      new BABYLON.Vector3(0, 0.7, 0),
       this.scene
     );
     camera.attachControl(this.canvas, true);
 
     // Zoom lock
-    const zoomLockDistance = 2; // fixed distance
+    const zoomLockDistance = 2.5; // fixed distance
     camera.lowerRadiusLimit = zoomLockDistance;
     camera.upperRadiusLimit = zoomLockDistance;
 
-    new BABYLON.HemisphericLight(
+    const light = new BABYLON.HemisphericLight(
       "light",
       new BABYLON.Vector3(1, 1, 0),
       this.scene
     );
+    light.intensity = 1.2;
   }
 
-  linkBonesToNodes(skeleton) {
-    skeleton.bones.forEach((bone) => {
-      const node = this.scene.getNodeByName(bone.name);
-      if (node) {
-        bone.linkedNode = node;
+  loadAnimationFromGLB(url, fileName) {
+    BABYLON.SceneLoader.ImportMesh(
+      "",
+      url,
+      fileName,
+      this.scene,
+      (meshes, particleSystems, skeletons, animationGroups) => {
+        // Animation groups
+        this.storedAnimations = animationGroups;
+        console.log("Animation groups extracted and stored.");
+
+        meshes.forEach((mesh) => {
+          mesh.dispose(); // remove mesh
+        });
       }
-    });
+    );
   }
 
   addMesh(mesh) {
     const rootMesh = mesh;
-    rootMesh.position = new BABYLON.Vector3(0, -0.7, 0);
+    rootMesh.position = new BABYLON.Vector3(0, 0, 0);
     rootMesh.scaling = new BABYLON.Vector3(0.7, 0.7, 0.7);
-    // this.scene.addMesh(rootMesh);
   }
-
-  // startAnimation(bpm) {
-  //   if (this.animationGroups && this.animationGroups.length > 0 && bpm) {
-  //     // this.configureAnimations(bpm);
-  //     this.animationGroups.forEach((group) => group.start(true));
-  //     console.log(`Animation started with BPM: ${bpm}`);
-  //   } else {
-  //     console.log("Waiting for BPM to start animation...");
-  //   }
-  // }
 
   getScene() {
     return this.scene;
