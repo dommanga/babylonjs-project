@@ -79,7 +79,7 @@ header {
 }
 
 .music-controls {
-  display: flex;
+  display: none;
   justify-content: center; /* 중앙에 배치 */
   align-items: center;
   gap: 20px; /* 간격 조정 */

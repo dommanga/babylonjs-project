@@ -67,6 +67,8 @@ export class AudioManager {
                 document.getElementById(
                   "bpmDisplay"
                 ).innerText = `Detected BPM: ${this.bpm}`;
+                document.querySelector(".music-controls").style.display =
+                  "flex";
                 this.animator.setAnimationSpeed(this.bpm);
               })
               .catch((err) => {

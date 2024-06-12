@@ -25,12 +25,26 @@ export class SceneManager {
     camera.lowerRadiusLimit = zoomLockDistance;
     camera.upperRadiusLimit = zoomLockDistance;
 
+    const groundMaterial = new BABYLON.StandardMaterial(
+      "groundMaterial",
+      this.scene
+    );
+    groundMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+
+    const ground = BABYLON.MeshBuilder.CreateGround(
+      "ground",
+      { width: 10, height: 10 },
+      this.scene
+    );
+    ground.material = groundMaterial;
+
     const light = new BABYLON.HemisphericLight(
       "light",
       new BABYLON.Vector3(1, 1, 0),
       this.scene
     );
-    light.intensity = 1.2;
+    light.diffuse = new BABYLON.Color3(1, 1, 1);
+    light.intensity = 0.4;
   }
 
   loadAnimationFromGLB(url, fileName) {
@@ -55,6 +69,15 @@ export class SceneManager {
     const rootMesh = mesh;
     rootMesh.position = new BABYLON.Vector3(0, 0, 0);
     rootMesh.scaling = new BABYLON.Vector3(0.7, 0.7, 0.7);
+
+    const modelMaterial = new BABYLON.StandardMaterial(
+      "modelMaterial",
+      this.scene
+    );
+    modelMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+    modelMaterial.specularColor = new BABYLON.Color3(1, 1, 1);
+
+    rootMesh.material = modelMaterial;
   }
 
   getScene() {
