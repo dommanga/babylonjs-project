@@ -115,21 +115,21 @@ header {
 
 .music-controls {
   display: none;
-  justify-content: center; /* 중앙에 배치 */
+  justify-content: center;
   align-items: center;
-  gap: 20px; /* 간격 조정 */
+  gap: 20px;
   flex-grow: 1;
 }
 
 .music-button {
-  width: 30px; /* 버튼 너비 */
-  height: 30px; /* 버튼 높이 */
+  width: 30px;
+  height: 30px;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
   border: none;
   cursor: pointer;
-  background-color: transparent; /* 배경색 투명 */
+  background-color: transparent;
   transition: transform 0.3s ease, filter 0.3s ease;
 }
 
@@ -167,7 +167,6 @@ header {
   flex-grow: 1;
 }
 
-/* 반응형 디자인을 위한 미디어 쿼리 */
 @media (max-width: 768px) {
   .banner-buttons {
     flex-direction: row;
