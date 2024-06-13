@@ -13,15 +13,15 @@ export class FileUploader {
     if (files.length > 0) {
       const file = files[0];
       const fileName = file.name;
-
-      // disable file uploading button
-      const file_button = document.querySelector(".file-button");
-      file_button.style.filter = "brightness(0.5)";
-      file_button.disabled = true;
-
       const formData = new FormData();
       formData.append("file", file);
+
       console.log("Uploading file...");
+
+      const overlay = document.getElementById("loadingOverlay");
+      this.disableFileUploadButtion();
+      this.showLoadingIndicator(overlay);
+
       fetch("/upload", { method: "POST", body: formData })
         .then((response) => response.json())
         .then((data) =>
@@ -32,12 +32,7 @@ export class FileUploader {
             this.sceneManager.getScene()
           )
             .then((result) => {
-              if (result.animationGroups.length > 0) {
-                console.log("base animation stop.");
-                result.animationGroups.forEach((group) => group.stop());
-              }
-
-              this.sceneManager.addMesh(result.meshes[0]);
+              this.hideLoadingIndicator(overlay);
 
               this.animator.storeModelData2Animator(
                 result.meshes[0],
@@ -47,10 +42,42 @@ export class FileUploader {
               this.animator.applyStoredAnimationToModel(
                 this.sceneManager.storedAnimations
               );
+
+              this.sceneManager.addMesh(result.meshes[0]);
             })
-            .catch((error) => console.error("Error loading model:", error))
+            .catch((error) => {
+              console.error("Error loading model:", error);
+              this.hideLoadingIndicator(overlay);
+            })
         )
-        .catch((error) => console.error("Error uploading file:", error));
+        .catch((error) => {
+          console.error("Error uploading file:", error);
+          this.hideLoadingIndicator(overlay);
+        });
     }
+  }
+
+  disableFileUploadButtion() {
+    const file_button = document.querySelector(".file-button");
+    file_button.style.filter = "brightness(0.5)";
+    file_button.disabled = true;
+  }
+
+  showLoadingIndicator(overlay) {
+    overlay.style.display = "flex";
+    overlay.style.visibility = "visible";
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        overlay.style.opacity = "1";
+      });
+    });
+  }
+
+  hideLoadingIndicator(overlay) {
+    overlay.style.opacity = "0";
+    setTimeout(() => {
+      overlay.style.display = "none";
+      overlay.style.visibility = "hidden";
+    }, 300);
   }
 }
