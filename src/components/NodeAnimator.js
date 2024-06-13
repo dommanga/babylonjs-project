@@ -7,6 +7,8 @@ export class NodeAnimator {
     this.bpm = null;
     this.boneConfig = this.defineBoneConfigs();
     this.ikControllers = {};
+    this.intervals = [];
+    this.transitionDuration = null;
     this.isGlobalTransitioning = false;
   }
 
@@ -49,6 +51,27 @@ export class NodeAnimator {
     this.animationGroups.forEach((group) => {
       group.speedRatio = speedRatio;
     });
+    this.updateTransitionDuration();
+  }
+
+  updateTransitionDuration() {
+    this.transitionDuration = 60000 / this.bpm;
+    this.intervals.forEach(clearInterval);
+    this.intervals = [];
+
+    // Re-register animation updates with the new transition duration
+    for (const boneName in this.ikControllers) {
+      const ikController = this.ikControllers[boneName];
+      const config = this.boneConfig[boneName];
+      const target = ikController.targetMesh;
+      this.registerAnimationUpdates(
+        this.scene,
+        ikController,
+        target,
+        config,
+        this.bpm
+      );
+    }
   }
 
   defineBoneConfigs() {
@@ -242,7 +265,7 @@ export class NodeAnimator {
 
     let isLocalTransitioning = false;
     let transitionStartTime = 0;
-    const transitionDuration = 60000 / bpm;
+    // const transitionDuration = 60000 / bpm;
 
     const updateRandomTargetPosition = () => {
       currentTargetPosition.copyFrom(target.position);
@@ -263,10 +286,11 @@ export class NodeAnimator {
       transitionStartTime = Date.now();
     };
 
-    setInterval(() => {
+    const intervalID = setInterval(() => {
       updateRandomTargetPosition();
       updatePoleAngle();
-    }, transitionDuration);
+    }, this.transitionDuration);
+    this.intervals.push(intervalID);
 
     const easingFunction = (t) => t * t * (3 - 2 * t);
     const easingFunction_sin = (t) => 0.5 - Math.cos(t * Math.PI) / 2;
@@ -275,7 +299,7 @@ export class NodeAnimator {
       ikController.update();
       if (isLocalTransitioning && this.isGlobalTransitioning) {
         const progress = Math.min(
-          (Date.now() - transitionStartTime) / transitionDuration,
+          (Date.now() - transitionStartTime) / this.transitionDuration,
           1
         );
         target.position = BABYLON.Vector3.Lerp(

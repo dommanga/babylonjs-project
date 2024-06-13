@@ -38,6 +38,7 @@ export class AudioManager {
       // extract song's title only
       this.extractSongTitle(fileName);
       this.disableSoundUploadButtion();
+      this.setUIwBpm(false);
 
       const reader = new FileReader();
 
@@ -57,7 +58,7 @@ export class AudioManager {
               .then((bpm) => {
                 this.bpm = Math.round(bpm);
                 this.animator.setAnimationSpeed(this.bpm);
-                this.setUIwBpm();
+                this.setUIwBpm(true);
               })
               .catch((err) => {
                 console.error("Error analyzing BPM:", error);
@@ -86,11 +87,22 @@ export class AudioManager {
     sound_button.disabled = true;
   }
 
-  setUIwBpm() {
-    document.getElementById(
-      "bpmDisplay"
-    ).innerText = `Detected BPM: ${this.bpm}`;
-    document.querySelector(".music-controls").style.display = "flex";
+  enableSoundUploadButtion() {
+    const sound_button = document.querySelector(".sound-button");
+    sound_button.style.filter = "brightness(1)";
+    sound_button.disabled = false;
+  }
+
+  setUIwBpm(enable) {
+    if (enable) {
+      document.getElementById(
+        "bpmDisplay"
+      ).innerText = `Detected BPM: ${this.bpm}`;
+      document.querySelector(".music-controls").style.display = "flex";
+    } else {
+      document.getElementById("bpmDisplay").innerText = `detecting...`;
+      document.querySelector(".music-controls").style.display = "none";
+    }
   }
 
   playAudio() {
@@ -104,6 +116,8 @@ export class AudioManager {
       this.sourceNode.connect(this.audioContext.destination);
       this.sourceNode.start(0, this.pausedAt);
       this.startTime = this.audioContext.currentTime - this.pausedAt;
+
+      this.disableSoundUploadButtion();
 
       if (this.pausedAt > 0 || this.stopped) {
         this.animator.resumeAnimation();
@@ -121,6 +135,8 @@ export class AudioManager {
       this.pausedAt = this.audioContext.currentTime - this.startTime;
       this.animator.pauseAnimation();
 
+      this.disableSoundUploadButtion();
+
       console.log("Audio paused at:", this.pausedAt);
     }
   }
@@ -132,6 +148,8 @@ export class AudioManager {
       this.pausedAt = 0;
       this.stopped = true;
       this.animator.stopAnimation();
+
+      this.enableSoundUploadButtion();
 
       console.log("Audio stopped...");
     }
