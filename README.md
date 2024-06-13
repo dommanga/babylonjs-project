@@ -24,6 +24,10 @@ Before you begin, make sure you have the following files ready:
 4. **Interact with the 3D View**: Click and drag your mouse across the screen to explore different angles of the 3D animation.
 5. **Reload for New Files**: If you wish to upload different files and restart the animation, simply refresh the page. This is necessary as the upload buttons will be disabled after the initial upload for performance reasons.
 
+
+- **Model Acquisition**: You can obtain 3D models from [Mixamo](https://www.mixamo.com/), which offers a wide range of characters and animations.
+- **Upload Time**: Please note that uploading larger models may take some time, so your patience is appreciated.
+
 ## 🌟 Features
 
 - **User-Friendly Interface**: Simple and easy navigation.
