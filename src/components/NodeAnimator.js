@@ -15,7 +15,16 @@ export class NodeAnimator {
     this.skeleton = skeleton;
   }
 
-  applyStoredAnimationToModel(storedAnimations) {
+  applyStoredAnimationToModel(uploaded, storedAnimations) {
+    function stopBaseAnimation() {
+      if (uploaded.animationGroups.length > 0) {
+        uploaded.animationGroups.forEach((group) => group.stop());
+        console.log("base animation stop");
+      }
+    }
+
+    stopBaseAnimation();
+
     this.animationGroups = storedAnimations;
     this.animationGroups.forEach((animationGroup) => {
       animationGroup.targetedAnimations.forEach((targetedAnimation) => {

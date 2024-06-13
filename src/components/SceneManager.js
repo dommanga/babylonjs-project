@@ -1,30 +1,56 @@
 export class SceneManager {
   constructor(canvasId) {
-    this.canvas = document.getElementById(canvasId);
-    this.engine = new BABYLON.Engine(this.canvas, true);
-    this.scene = new BABYLON.Scene(this.engine);
+    this.initializeEngine(canvasId);
     this.createScene();
-    this.engine.runRenderLoop(() => this.scene.render());
-    window.addEventListener("resize", () => this.engine.resize());
+    this.runRenderLoop();
+    this.setupResizeListener();
     this.storedAnimations = [];
   }
 
+  initializeEngine(canvasId) {
+    this.canvas = document.getElementById(canvasId);
+    this.engine = new BABYLON.Engine(this.canvas, true);
+    this.scene = new BABYLON.Scene(this.engine);
+  }
+
+  runRenderLoop() {
+    this.engine.runRenderLoop(() => this.scene.render());
+  }
+
+  setupResizeListener() {
+    window.addEventListener("resize", () => this.engine.resize());
+  }
+
   createScene() {
+    this.setupCamera();
+    this.setupLighting();
+    this.setupGround();
+  }
+
+  setupCamera() {
     const camera = new BABYLON.ArcRotateCamera(
       "camera",
       -Math.PI / 2,
       Math.PI / 2,
-      2,
+      2.5,
       new BABYLON.Vector3(0, 0.7, 0),
       this.scene
     );
     camera.attachControl(this.canvas, true);
+    camera.lowerRadiusLimit = camera.upperRadiusLimit = 2.5; // Zoom lock
+  }
 
-    // Zoom lock
-    const zoomLockDistance = 2.5; // fixed distance
-    camera.lowerRadiusLimit = zoomLockDistance;
-    camera.upperRadiusLimit = zoomLockDistance;
+  setupLighting() {
+    const light = new BABYLON.HemisphericLight(
+      "light",
+      new BABYLON.Vector3(1, 1, 0),
+      this.scene
+    );
+    light.diffuse = new BABYLON.Color3(1, 1, 1);
+    light.intensity = 0.4;
+  }
 
+  setupGround() {
     const groundMaterial = new BABYLON.StandardMaterial(
       "groundMaterial",
       this.scene
@@ -37,14 +63,6 @@ export class SceneManager {
       this.scene
     );
     ground.material = groundMaterial;
-
-    const light = new BABYLON.HemisphericLight(
-      "light",
-      new BABYLON.Vector3(1, 1, 0),
-      this.scene
-    );
-    light.diffuse = new BABYLON.Color3(1, 1, 1);
-    light.intensity = 0.4;
   }
 
   loadAnimationFromGLB(url, fileName) {
@@ -54,30 +72,20 @@ export class SceneManager {
       fileName,
       this.scene,
       (meshes, particleSystems, skeletons, animationGroups) => {
-        // Animation groups
         this.storedAnimations = animationGroups;
+        meshes.forEach((mesh) => mesh.dispose()); // Clean up meshes
         console.log("Animation groups extracted and stored.");
-
-        meshes.forEach((mesh) => {
-          mesh.dispose(); // remove mesh
-        });
       }
     );
   }
 
   addMesh(mesh) {
-    const rootMesh = mesh;
-    rootMesh.position = new BABYLON.Vector3(0, 0, 0);
-    rootMesh.scaling = new BABYLON.Vector3(0.7, 0.7, 0.7);
-
-    const modelMaterial = new BABYLON.StandardMaterial(
-      "modelMaterial",
-      this.scene
-    );
-    modelMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
-    modelMaterial.specularColor = new BABYLON.Color3(1, 1, 1);
-
-    rootMesh.material = modelMaterial;
+    mesh.position = new BABYLON.Vector3(0, 0, 0);
+    mesh.scaling = new BABYLON.Vector3(0.7, 0.7, 0.7);
+    mesh.material = new BABYLON.StandardMaterial("modelMaterial", this.scene);
+    mesh.material.diffuseColor = new BABYLON.Color3(0, 0, 0);
+    mesh.material.specularColor = new BABYLON.Color3(1, 1, 1);
+    this.scene.addMesh(mesh);
   }
 
   getScene() {

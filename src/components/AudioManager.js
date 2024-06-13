@@ -33,21 +33,13 @@ export class AudioManager {
       const file = files[0];
       let fileName = file.name;
 
-      // extract song's title only
-      const lastDotIndex = fileName.lastIndexOf(".");
-      if (lastDotIndex > 0) {
-        fileName = fileName.substring(0, lastDotIndex);
-      }
+      console.log("Uploading audio file...");
 
-      // disable sound uploading button
-      const sound_button = document.querySelector(".sound-button");
-      sound_button.style.filter = "brightness(0.5)";
-      sound_button.disabled = true;
-      document.getElementById("musicUploadStatus").innerText = fileName;
+      // extract song's title only
+      this.extractSongTitle(fileName);
+      this.disableSoundUploadButtion();
 
       const reader = new FileReader();
-
-      console.log("Uploading audio file...");
 
       reader.onload = (e) => {
         const arrayBuffer = e.target.result;
@@ -64,12 +56,8 @@ export class AudioManager {
             analyze(this.audioBuffer)
               .then((bpm) => {
                 this.bpm = Math.round(bpm);
-                document.getElementById(
-                  "bpmDisplay"
-                ).innerText = `Detected BPM: ${this.bpm}`;
-                document.querySelector(".music-controls").style.display =
-                  "flex";
                 this.animator.setAnimationSpeed(this.bpm);
+                this.setUIwBpm();
               })
               .catch((err) => {
                 console.error("Error analyzing BPM:", error);
@@ -82,6 +70,27 @@ export class AudioManager {
       };
       reader.readAsArrayBuffer(file);
     }
+  }
+
+  extractSongTitle(fileName) {
+    const lastDotIndex = fileName.lastIndexOf(".");
+    if (lastDotIndex > 0) {
+      fileName = fileName.substring(0, lastDotIndex);
+    }
+    document.getElementById("musicUploadStatus").innerText = fileName;
+  }
+
+  disableSoundUploadButtion() {
+    const sound_button = document.querySelector(".sound-button");
+    sound_button.style.filter = "brightness(0.5)";
+    sound_button.disabled = true;
+  }
+
+  setUIwBpm() {
+    document.getElementById(
+      "bpmDisplay"
+    ).innerText = `Detected BPM: ${this.bpm}`;
+    document.querySelector(".music-controls").style.display = "flex";
   }
 
   playAudio() {

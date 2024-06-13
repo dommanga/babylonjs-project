@@ -38,11 +38,10 @@ export class FileUploader {
                 result.meshes[0],
                 result.skeletons[0]
               );
-
               this.animator.applyStoredAnimationToModel(
+                result,
                 this.sceneManager.storedAnimations
               );
-
               this.sceneManager.addMesh(result.meshes[0]);
             })
             .catch((error) => {
