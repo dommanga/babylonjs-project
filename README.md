@@ -35,6 +35,12 @@ Before you begin, make sure you have the following files ready:
 - **Dynamic Content**: Ability to load and animate different models and music.
 - **Automatic BPM Analysis and Synchronization**: Automatically analyzes the BPM of the music to synchronize both the dance animations and the colorful stage lighting, ensuring that the movements and visual effects perfectly match the rhythm.
 
+<div style="display: flex; justify-content: center; gap: 10px;">
+  <img src="https://github.com/dommanga/babylonjs-project/assets/87713631/87639709-82a0-4d98-9c0d-dbd5922fa356" alt="GIF 1" width="300px"/>
+  <img src="https://github.com/dommanga/babylonjs-project/assets/87713631/5a050a90-c7b4-4bdf-b640-eb923399d7cc" alt="GIF 2" width="300px"/>
+  <img src="https://github.com/dommanga/babylonjs-project/assets/87713631/a3b50fe7-e92c-4fcb-923a-849b426ba055" alt="GIF 3" width="300px" />
+</div>
+
 ## 📫 Support
 
 If you encounter any issues or have questions, please feel free to contact me at [leejm21@postech.ac.kr](mailto:leejm21@postech.ac.kr).
