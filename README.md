@@ -22,7 +22,7 @@ Before you begin, make sure you have the following files ready:
 2. **Play Music**: After uploading, a music controller and the BPM of the music will be displayed. Use the controller to start playing your music.
 3. **Enjoy the Animation**: Once the music starts, your 3D model will begin to dance in sync with the music. You can watch the animation in a fully interactive 3D environment.
 4. **Interact with the 3D View**: Click and drag your mouse across the screen to explore different angles of the 3D animation.
-5. **Reload for New Files**: If you wish to upload different model files and restart the animation, simply refresh the page. If you want to change only the music for the same model, press the stop button to upload a new audio file.
+5. **Reload for New Files**: If you want to change only the **music** for the same model, press the *stop button* to upload a new audio file. If you wish to upload different **model** files and restart the animation, simply *refresh* the page.
 
 - **Model Acquisition**: You can obtain 3D models from [Mixamo](https://www.mixamo.com/), which offers a wide range of characters and animations.
 - **Upload Time**: Please note that uploading larger models may take some time, so your patience is appreciated.
