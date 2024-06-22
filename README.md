@@ -8,21 +8,45 @@ Welcome to the Dance Animation web application! This platform allows you to enjo
 
 ## 👍 Getting Started
 
-🔗Visit the web application at: [Dance Animation](https://dance-animation-f2812e68ef33.herokuapp.com/)
-
 ### Prerequisites
 
 Before you begin, make sure you have the following files ready:
+- Node.js installed on your machine.
 - A 3D model file in `.fbx` format.
 - An audio file in `.mp3` format.
+- Git installed to clone the repository.
+
+### Installation and Local Setup
+
+1. **Clone the Repository**: First, clone the repository to your local machine using:
+   ```bash
+   git clone https://github.com/dommanga/babylonjs-project.git
+2. **Navigate to the Repository Directory**:
+   ```bash
+   cd babylonjs-project
+4. **Install Dependencies**: Install the necessary Node.js packages:
+   ```bash
+   npm install
+6. **Build the Application**:
+   ```bash
+   npm run build
+8. **Start the Server**:
+   ```bash
+   npm start
+
+This will start the local server, typically accessible via `http://localhost:3000` in your web browser.
+
 
 ### How to Use
 
-1. **Upload Your Files**: Start by uploading your `.fbx` model and `.mp3` audio file using the designated upload fields on the webpage.
-2. **Play Music**: After uploading, a music controller and the BPM of the music will be displayed. Use the controller to start playing your music.
-3. **Enjoy the Animation**: Once the music starts, your 3D model will begin to dance in sync with the music. You can watch the animation in a fully interactive 3D environment.
-4. **Interact with the 3D View**: Click and drag your mouse across the screen to explore different angles of the 3D animation.
-5. **Reload for New Files**: If you want to change only the **music** for the same model, press the *stop button* to upload a new audio file. If you wish to upload different **model** files and restart the animation, simply *refresh* the page.
+After starting the server, follow these steps to use the application:
+
+1. **Access the Application**: Open your web browser and go to `http://localhost:3000`.
+2. **Upload Your Files**: Start by uploading your `.fbx` model and `.mp3` audio file using the designated upload fields on the webpage.
+3. **Play Music**: After uploading, a music controller and the BPM of the music will be displayed. Use the controller to start playing your music.
+4. **Enjoy the Animation**: Once the music starts, your 3D model will begin to dance in sync with the music. You can watch the animation in a fully interactive 3D environment.
+5. **Interact with the 3D View**: Click and drag your mouse across the screen to explore different angles of the 3D animation.
+6. **Reload for New Files**: If you want to change only the **music** for the same model, press the *stop button* to upload a new audio file. If you wish to upload different **model** files and restart the animation, simply *refresh* the page.
 
 - **Model Acquisition**: You can obtain 3D models from [Mixamo](https://www.mixamo.com/), which offers a wide range of characters and animations.
 - **Upload Time**: Please note that uploading larger models may take some time, so your patience is appreciated.
